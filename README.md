@@ -35,7 +35,7 @@ El panel administrativo ofrece control total sobre los registros, permitiendo ap
 
 ## Features
 
-- 📋 **Public registration form** — churches and leaders can register for the VBS package providing their contact info, church, denomination, location and cargo
+- 📋 **Public registration form** — churches and leaders register for the VBS package providing contact info, church, denomination, location and role
 - ✅ **Status workflow** — each registration goes through `pendiente → aprobado / rechazado`
 - 📧 **Automated email notifications** — confirmation and status update emails sent via SMTP
 - 🔐 **Protected admin dashboard** — manage registrations and training events behind NextAuth authentication
@@ -77,7 +77,7 @@ El panel administrativo ofrece control total sobre los registros, permitiendo ap
 - Node.js 20+
 - Yarn 4.9+
 
-> For production with PostgreSQL, see the [Docker section](#docker-setup) below.
+> For production with PostgreSQL, see the [Docker](#docker-setup) or [Dokploy](#dokploy-deployment) sections below.
 
 ---
 
@@ -123,17 +123,23 @@ CONTACT_EMAIL=equipo@ministerio.org
 ADMIN_EMAIL=admin@ministerio.org
 ```
 
-### 4. Run database migrations
+### 4. Set up the database
 
 ```bash
-yarn prisma migrate dev
-```
+# Create tables and apply all migrations
+yarn prisma migrate dev --name init
 
-### 5. Seed the database
-
-```bash
+# Seed with default users and sample data
 yarn prisma db seed
 ```
+
+### 5. Start the development server
+
+```bash
+yarn dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 Default users created by the seed:
 
@@ -142,32 +148,101 @@ Default users created by the seed:
 | `admin@kids.com`  | `admin1234`  | admin  |
 | `editor@kids.com` | `editor1234` | editor |
 
-### 6. Start the development server
-
-```bash
-yarn dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
 ---
 
-## Database Commands
+## Prisma — Database Commands
 
-| Command                      | Description                                  |
-| ---------------------------- | -------------------------------------------- |
-| `yarn prisma migrate dev`    | Apply migrations and regenerate client (dev) |
-| `yarn prisma migrate deploy` | Apply migrations in production               |
-| `yarn prisma migrate reset`  | Reset DB and re-apply all migrations         |
-| `yarn prisma generate`       | Regenerate Prisma Client without migrating   |
-| `yarn prisma studio`         | Open Prisma Studio GUI                       |
-| `yarn prisma db seed`        | Seed the database                            |
+### First time / fresh clone
+
+```bash
+# Install deps + auto-generate Prisma Client
+yarn install
+
+# Create and apply first migration
+yarn prisma migrate dev --name init
+
+# Seed the database
+yarn prisma db seed
+```
+
+### Day-to-day development
+
+```bash
+# After modifying schema.prisma — create and apply a new migration
+yarn prisma migrate dev --name nombre_descriptivo
+
+# Examples:
+yarn prisma migrate dev --name add_foto_to_registro
+yarn prisma migrate dev --name create_table_eventos
+
+# Quick schema test without creating a migration (no history)
+yarn prisma db push
+
+# Regenerate Prisma Client manually (runs automatically on install and migrate)
+yarn prisma generate
+```
+
+### Reset the database
+
+```bash
+# Wipe DB, re-apply all migrations and run seed
+yarn prisma migrate reset
+
+# Same but skip seed
+yarn prisma migrate reset --skip-seed
+```
+
+### Production / Docker / Dokploy
+
+```bash
+# Apply existing migrations only — never use migrate dev in production
+yarn prisma migrate deploy
+
+# Check which migrations are applied / pending
+yarn prisma migrate status
+```
+
+### Inspect the database
+
+```bash
+# Open Prisma Studio (visual GUI in the browser)
+yarn prisma studio
+
+# Pull schema from an existing database
+yarn prisma db pull
+
+# Format schema.prisma
+yarn prisma format
+```
+
+### Quick reference
+
+| Situation                      | Command                                      |
+| ------------------------------ | -------------------------------------------- |
+| First time / fresh clone       | `yarn prisma migrate dev --name init`        |
+| Modified schema.prisma         | `yarn prisma migrate dev --name description` |
+| Quick schema test (no history) | `yarn prisma db push`                        |
+| Deploy to production           | `yarn prisma migrate deploy`                 |
+| Check migration status         | `yarn prisma migrate status`                 |
+| Reset everything (dev only)    | `yarn prisma migrate reset`                  |
+| Inspect data visually          | `yarn prisma studio`                         |
+| Client not generated           | `yarn prisma generate`                       |
+| Load initial data              | `yarn prisma db seed`                        |
+
+> 💡 **Rule of thumb:** use `migrate dev` in development, always use `migrate deploy` in production/Docker. Never run `migrate dev` in production.
 
 ---
 
 ## Docker Setup
 
-The Docker setup uses **PostgreSQL**. Update the `schema.prisma` datasource provider to `postgresql` before building.
+> ⚠️ Before building, update `schema.prisma` to use `postgresql`:
+>
+> ```prisma
+> datasource db {
+>   provider = "postgresql"
+>   url      = env("DATABASE_URL")
+> }
+> ```
 
 ### Option A — App + Database (recommended)
 
@@ -253,14 +328,12 @@ docker compose up -d
 # Run migrations
 docker compose exec app yarn prisma migrate deploy
 
-# Seed
+# Seed (first time only)
 docker compose exec app yarn prisma db seed
 
-# Logs
+# View logs
 docker compose logs -f app
 ```
-
----
 
 ### Option B — Database only (dev mode)
 
@@ -288,9 +361,77 @@ yarn dev
 
 ---
 
-## Production Deployment
+## Dokploy Deployment
 
-### Vercel
+### 1. Create the database
+
+In the Dokploy panel go to **Database → Create Database**, select **PostgreSQL**:
+
+```
+Name:     kids_db
+User:     kids_user
+Password: kids_pass
+```
+
+Copy the **Internal Database URL** — format: `postgresql://kids_user:kids_pass@kids_db:5432/kids_db`
+
+### 2. Create the application
+
+**Projects → Create Project → Create Service → Application**, connect your GitHub repo and set:
+
+```
+Branch:     main
+Build Type: Dockerfile
+```
+
+### 3. Set environment variables
+
+In the **Environment** tab:
+
+```env
+DATABASE_URL=postgresql://kids_user:kids_pass@kids_db:5432/kids_db
+APP_URL=http://tu-dominio.com
+MINISTERIO_LOGO=http://tu-dominio.com/img/logo.png
+SMTP_HOST=smtp.tudominio.com
+SMTP_PORT=587
+SMTP_USER=notificaciones@tudominio.com
+SMTP_PASS=tu_contraseña
+CONTACT_EMAIL=equipo@ministerio.org
+ADMIN_EMAIL=admin@ministerio.org
+```
+
+### 4. Set the start command
+
+In **General → Start Command**:
+
+```bash
+sh -c "yarn prisma migrate deploy && node server.js"
+```
+
+### 5. Deploy
+
+Click **Deploy** and follow the logs in the **Logs** tab.
+
+### 6. Seed (first time only)
+
+Once the container is running, open the **Terminal** tab in Dokploy and run:
+
+```bash
+yarn prisma db seed
+```
+
+### Troubleshooting
+
+| Problem                   | Solution                                                                   |
+| ------------------------- | -------------------------------------------------------------------------- |
+| `Can't reach database`    | Make sure `DATABASE_URL` uses the internal container name, not `localhost` |
+| `Prisma Client not found` | Add `yarn prisma generate &&` before `migrate deploy` in the start command |
+| `Module not found`        | Verify the `Dockerfile` is at the root of the repo                         |
+| Migrations not running    | Check container startup logs for `prisma migrate deploy` output            |
+
+---
+
+## Production Deployment (Vercel)
 
 1. Add all environment variables in the Vercel dashboard:
 
@@ -306,7 +447,7 @@ yarn dev
 | `CONTACT_EMAIL`   | Contact email shown in notifications  |
 | `ADMIN_EMAIL`     | Admin email for internal alerts       |
 
-2. `postinstall` already runs `prisma generate` on every deploy.
+2. `postinstall` already runs `prisma generate` on every deploy automatically.
 3. Run migrations before first deploy:
 
 ```bash
