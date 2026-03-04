@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+   provider = "sqlite"
+   url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String   // Encriptada
+  nombre    String
+  rol       String   @default("admin") // Ej: admin, editor, etc.
+  createdAt DateTime @default(now())
+}
+
+
+model Registro {
+  id         Int     @default(autoincrement()) @id// ID Secuencial
+  slug       String              // cuid2 generado manualmente
+  name       String
+  tel        String
+  email      String?
+  ci         String
+  iglesia    String
+  denominacion    String
+  direccion  String
+  municipio  String
+  provincia  String
+  cargo      String?
+  cantidad   Int      @default(1)
+  estado     String   @default("pendiente") // Puedes cambiar estados luego
+  createdAt  DateTime @default(now())
+}
+
+model Entrenamiento {
+  id           String   @id @default(cuid())
+  entrenamiento String
+  fecha        DateTime
+  iglesia      String
+  direccion    String
+  municipio    String
+  provincia    String
+  createdAt    DateTime @default(now())
+}
+
+

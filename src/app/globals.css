@@ -1,0 +1,163 @@
+@import "tailwindcss";
+
+html {
+    scroll-behavior: smooth;
+}
+
+:root {
+    --background: #ffffff;
+    --foreground: #171717;
+}
+
+@theme inline {
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --font-sans: var(--font-geist-sans);
+    --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background: #0a0a0a;
+        --foreground: #ededed;
+    }
+}
+
+body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+@font-face {
+    font-family: "Water";
+    src: url("/fonts/water.otf") format("otf");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap; /* Mejora la renderización mientras se carga la fuente */
+}
+
+.scale-animation {
+    animation: scaleAnimation 3s ease-in-out infinite;
+}
+
+@keyframes scaleAnimation {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.08);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.bee-animation {
+    animation: beeAnimation 8s ease-in-out infinite;
+}
+
+@keyframes beeAnimation {
+    0% {
+        transform: translate(0, 0) scaleX(-1); /* Comienza invertida */
+    }
+    5% {
+        transform: translate(0, 0) scaleX(1); /* Comienza invertida */
+    }
+    47% {
+        transform: translate(1000px, -200px) scaleX(1); /* Se mueve sin girarse */
+    }
+    50% {
+        transform: translate(1200px, -200px) scaleX(1); /* Se mueve sin girarse */
+    }
+    53% {
+        transform: translate(1000px, -200px) scaleX(-1); /* Se mueve sin girarse */
+    }
+    95% {
+        transform: translate(0, 0) scaleX(-1); /* Comienza invertida */
+    }
+    100% {
+        transform: translate(0, 0) scaleX(-1); /* Regresa invertida */
+    }
+}
+
+.flower-animation {
+    animation: flowerAnimation 4s ease-in-out infinite alternate;
+}
+
+.flower-animation:nth-child(2) {
+    animation-delay: 1s;
+}
+
+@keyframes flowerAnimation {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(7deg);
+    }
+}
+
+.expand-text {
+    animation: expandText 2s ease-out infinite;
+}
+
+.flash-text {
+    animation: 1.5s ease-in-out infinite;
+}
+
+.transformText {
+    animation: transformText 2s ease-in-out infinite;
+}
+
+@keyframes expandText {
+    0% {
+        transform: scaleX(0.2);
+        opacity: 0;
+    }
+    100% {
+        transform: scaleX(1);
+        opacity: 1;
+    }
+}
+
+@keyframes flashText {
+    0%,
+    50% {
+        opacity: 0;
+    }
+    51% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes transformText {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes fadein {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.animate-fadein {
+    animation: fadein 0.5s ease-in-out forwards;
+}
