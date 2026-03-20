@@ -19,13 +19,25 @@ ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
+# Copiar archivos necesarios
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/yarn.lock ./yarn.lock
+COPY --from=builder /app/.yarnrc.yml ./.yarnrc.yml
 COPY --from=builder /app/prisma ./prisma
+
+# Copiar node_modules de producción solamente (optimización)
+COPY --from=builder /app/node_modules ./node_modules
+
+# Si existe .yarn, también copiarlo
+COPY --from=builder /app/.yarn ./.yarn
+
 COPY entrypoint.sh ./
 RUN chmod +x entrypoint.sh
+
+# Asegurar que Yarn está disponible
+RUN corepack enable
 
 USER nextjs
 EXPOSE 3000
