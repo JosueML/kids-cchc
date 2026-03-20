@@ -1038,6 +1038,11 @@ export type EntrenamientoFindManyArgs<ExtArgs extends runtime.Types.Extensions.I
    * Skip the first `n` Entrenamientos.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of Entrenamientos.
+   */
   distinct?: Prisma.EntrenamientoScalarFieldEnum | Prisma.EntrenamientoScalarFieldEnum[]
 }
 

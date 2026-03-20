@@ -17,8 +17,8 @@ import type * as Prisma from "./prismaNamespace"
 
 const config: runtime.GetPrismaClientConfig = {
   "previewFeatures": [],
-  "clientVersion": "7.4.2",
-  "engineVersion": "94a226be1cf2967af2541cca5529f0f7ba866919",
+  "clientVersion": "7.5.0",
+  "engineVersion": "280c870be64f457428992c43c1f6d557fab6e29e",
   "activeProvider": "postgresql",
   "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nmodel Usuario {\n  id        String   @id @default(cuid())\n  email     String   @unique\n  password  String // Encriptada\n  nombre    String\n  rol       String   @default(\"admin\") // Ej: admin, editor, etc.\n  createdAt DateTime @default(now())\n}\n\nmodel Registro {\n  id           Int      @id @default(autoincrement()) // ID Secuencial\n  slug         String // cuid2 generado manualmente\n  name         String\n  tel          String\n  email        String?\n  ci           String\n  iglesia      String\n  denominacion String\n  direccion    String\n  municipio    String\n  provincia    String\n  cargo        String?\n  cantidad     Int      @default(1)\n  estado       String   @default(\"pendiente\") // Puedes cambiar estados luego\n  createdAt    DateTime @default(now())\n}\n\nmodel Entrenamiento {\n  id            String   @id @default(cuid())\n  entrenamiento String\n  fecha         DateTime\n  iglesia       String\n  direccion     String\n  municipio     String\n  provincia     String\n  createdAt     DateTime @default(now())\n}\n",
   "runtimeDataModel": {
