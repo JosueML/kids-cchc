@@ -6,6 +6,9 @@ COPY prisma ./prisma/
 RUN yarn install --immutable
 RUN yarn prisma generate
 COPY . .
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
+ENV NEXTAUTH_SECRET="dummy-secret-for-build"
+ENV NEXTAUTH_URL="http://localhost:3000"
 RUN yarn build
 
 FROM node:22-alpine AS runner
