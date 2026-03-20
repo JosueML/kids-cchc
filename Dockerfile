@@ -4,7 +4,6 @@ RUN corepack enable
 COPY package.json yarn.lock .yarnrc.yml ./
 COPY prisma ./prisma/
 RUN yarn install --immutable
-RUN yarn prisma generate
 COPY . .
 ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
 ENV NEXTAUTH_SECRET="dummy-secret-for-build"
