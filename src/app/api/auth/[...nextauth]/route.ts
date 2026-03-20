@@ -1,11 +1,9 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { compare } from "bcrypt";
 import { prisma } from "@/lib/prisma";
 
 const handler = NextAuth({
-    adapter: PrismaAdapter(prisma),
     session: {
         strategy: "jwt",
     },
@@ -24,7 +22,7 @@ const handler = NextAuth({
                 if (user && credentials?.password) {
                     const isValid = await compare(
                         credentials.password,
-                        user.password
+                        user.password,
                     );
                     if (isValid) return user;
                 }
