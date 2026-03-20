@@ -8,17 +8,24 @@ RUN yarn prisma generate
 COPY . .
 RUN yarn build
 
-FROM node:22-alpine
+FROM node:22-alpine AS runner
 WORKDIR /app
 RUN corepack enable
-COPY package.json yarn.lock .yarnrc.yml ./
-RUN yarn workspaces focus --production
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY prisma ./prisma/
+
+ENV NODE_ENV=production
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/prisma ./prisma
 COPY entrypoint.sh ./
 RUN chmod +x entrypoint.sh
 
+USER nextjs
 EXPOSE 3000
+
 ENTRYPOINT ["./entrypoint.sh"]
