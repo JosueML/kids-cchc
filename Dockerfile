@@ -26,6 +26,8 @@ COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/yarn.lock ./yarn.lock
 COPY --from=builder /app/.yarnrc.yml ./.yarnrc.yml
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
+COPY --from=builder /app/generated ./generated
 
 # Copiar node_modules de producción solamente (optimización)
 COPY --from=builder /app/node_modules ./node_modules
